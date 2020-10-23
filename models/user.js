@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const config = require('config');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -21,26 +23,59 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 5,
-        maxlength: 1024,
+        maxlength: 255,
         trim: true,
     },
     currentWeight: {
         type: Number,
-        required: false
+        required: false,
+        default: 0
     },
     goalWeight: {
         type: Number,
-        required: false
+        required: false,
+        default: 0
     },
     birthYear: {
         type: Date,
-        required: false
+        required: false,
+        default: new Date().getFullYear()
     },
     height: {
         type: Number, 
+        required: false,
+        default: 0
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    gender: {
+        type: String,
+        default: 'Female',
         required: false
     }
 });
+
+userSchema.methods.generateAuthToken = function() {
+    const token = jwt.sign(
+      {
+        _id: this._id,
+        firstName: this.firstName,
+        email: this.email,
+        isAdmin: this.isAdmin,
+        currentWeight: this.currentWeight,
+        goalWeight: this.goalWeight,
+        height: this.height,
+        birthYear: this.birthYear,
+        gender: this.gender
+      },
+      config.get('jwtPrivateKey')
+    );
+  
+    return token;
+}
 
 const User = mongoose.model('User', userSchema);
 
