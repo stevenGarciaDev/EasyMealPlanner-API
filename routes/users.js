@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
+const tokenAuth = require('../middleware/tokenAuth');
 const { User, validate } = require('../models/user');
 
 // Register a new user
@@ -24,6 +25,44 @@ router.post("/", async (req, res) => {
       .send({
         token
       });
+});
+
+router.put("/onboarding", tokenAuth, async (req, res) => {
+  const { 
+    unitForMass,
+    currentWeight,
+    goalWeight,
+    goalBodyType,
+    activityLevel,
+    gender,
+    age,
+    heightInFeet,
+    heightInRemainingInches,
+    dietRestrictions,
+    confirmAccount
+  } = req.body;
+
+  const userId = req.user._id;
+  console.log("req.user", req.user);
+  const user = await User.findByIdAndUpdate(userId,
+    {
+      unitForMass,
+      currentWeight,
+      goalWeight,
+      goalBodyType,
+      activityLevel,
+      gender,
+      age,
+      heightInFeet,
+      heightInRemainingInches,
+      dietRestrictions,
+      confirmAccount
+    }, { new: true });
+
+  if (!user) return res.status(404).send("User not found");
+
+  const token = user.generateAuthToken();
+  res.send(token);
 });
 
 module.exports = router;
