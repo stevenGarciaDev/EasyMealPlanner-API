@@ -36,14 +36,29 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    unitForMass: {
+        type: String, 
+        required: false,
+        default: ''
+    },
+    goalBodyType: {
+        type: String,
+        required: false,
+        default: 'Lean'
+    },
     birthYear: {
         type: Date,
         required: false,
         default: new Date().getFullYear()
     },
-    height: {
+    heightInFeet: {
         type: Number, 
         required: false,
+        default: 0
+    },
+    heightInRemainingInches: {
+        type: Number, 
+        required: false, 
         default: 0
     },
     isAdmin: {
@@ -55,6 +70,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'Female',
         required: false
+    },
+    confirmAccount: {
+        type: Boolean,
+        required: true,
+        default: false, 
     }
 });
 
@@ -69,7 +89,12 @@ userSchema.methods.generateAuthToken = function() {
         goalWeight: this.goalWeight,
         height: this.height,
         birthYear: this.birthYear,
-        gender: this.gender
+        gender: this.gender,
+        goalBodyType: this.goalBodyType,
+        unitForMass: this.unitForMass,
+        heightInFeet: this.heightInFeet, 
+        heightInRemainingInches: this.heightInRemainingInches,
+        confirmAccount: this.confirmAccount
       },
       config.get('jwtPrivateKey')
     );
@@ -87,7 +112,12 @@ function validateUser(user) {
         currentWeight: Joi.number(),
         goalWeight: Joi.number(),
         birthYear: Joi.date(),
-        height: Joi.number
+        height: Joi.number,
+        goalBodyType: Joi.string(),
+        unitForMass: Joi.string(),
+        heightInFeet: Joi.number(),
+        heightInRemainingInches: Joi.number(),
+        confirmAccount: Joi.boolean()
     });
 
     return schema.validate(user);

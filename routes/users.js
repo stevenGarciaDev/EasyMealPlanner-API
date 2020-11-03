@@ -43,7 +43,6 @@ router.put("/onboarding", tokenAuth, async (req, res) => {
   } = req.body;
 
   const userId = req.user._id;
-  console.log("req.user", req.user);
   const user = await User.findByIdAndUpdate(userId,
     {
       unitForMass,
