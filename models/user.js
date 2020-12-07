@@ -75,6 +75,11 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false, 
+    },
+    completedOnboarding: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 });
 
@@ -87,14 +92,8 @@ userSchema.methods.generateAuthToken = function() {
         isAdmin: this.isAdmin,
         currentWeight: this.currentWeight,
         goalWeight: this.goalWeight,
-        height: this.height,
-        birthYear: this.birthYear,
-        gender: this.gender,
-        goalBodyType: this.goalBodyType,
-        unitForMass: this.unitForMass,
-        heightInFeet: this.heightInFeet, 
-        heightInRemainingInches: this.heightInRemainingInches,
-        confirmAccount: this.confirmAccount
+        confirmAccount: this.confirmAccount,
+        completedOnboarding: this.completedOnboarding
       },
       config.get('jwtPrivateKey')
     );
