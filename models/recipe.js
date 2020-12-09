@@ -43,6 +43,11 @@ const recipeSchema = new mongoose.Schema({
     ingredients: {
         type: [ingredientSchema],
         required: true
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now(),
+        required: true
     }
 });
 
