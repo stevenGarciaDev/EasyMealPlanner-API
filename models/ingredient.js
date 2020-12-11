@@ -16,7 +16,7 @@ const ingredientSchema = new mongoose.Schema({
     aisle: {
         type: String,
         required: true,
-        enum: ['Produce', 'Meat']
+        enum: ['Produce', 'Meat', 'Dairy']
     }
 });
 
