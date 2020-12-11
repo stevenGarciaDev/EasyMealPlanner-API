@@ -41,9 +41,9 @@ router.get('/', tokenAuth, asyncMiddleware(async (req, res) => {
 /**
  * Get all recipes within the specified category.
  */
-router.get('/recipeCategory/:category', tokenAuth, asyncMiddleware(async (req, res) => {
+router.get('/recipeCategory/:categoryId', tokenAuth, asyncMiddleware(async (req, res) => {
     const recipes = await RecipeMealType
-        .find({ mealTypeID: req.params.category })
+        .find({ mealTypeID: req.params.categoryId })
         .populate('recipeID')
         .select('recipeID');
 
@@ -100,6 +100,10 @@ router.post('/', tokenAuth, adminTokenAuth, asyncMiddleware(async (req, res) => 
         description,
         ingredients
     });
+    const existingRecipe = await Recipe.find({ name: recipe.name });
+    if (existingRecipe.length != 0) {
+        return res.status(409).send('Duplicate recipe name');
+    }
     const result = await recipe.save();
 
     res.send(result);
@@ -112,13 +116,13 @@ router.post('/saveRecipe/:recipeId', tokenAuth, asyncMiddleware(async (req, res)
     const recipe = await Recipe.findById(req.params.recipeId);
 
     if (!recipe)
-        throw new Error(`Recipe with ID: ${req.params.recipeId} not found`);
+        return res.status(404).send(`Recipe with ID: ${req.params.recipeId} not found`);
 
     const existingSavedRecipe = await UserSavedRecipe
         .find({ userID: req.user._id, recipeID: recipe._id });
 
     if (existingSavedRecipe.length > 0) 
-        throw new Error(`User has already saved that recipe.`, existingSavedRecipe[0]);
+       return res.status(409).send(`User has already saved that recipe.`);
 
     const userSavedRecipe = new UserSavedRecipe({
         userID: req.user._id,
@@ -145,7 +149,7 @@ router.post('/addToCategory/:categoryId/:recipeId', tokenAuth, asyncMiddleware(a
     const recipe = await Recipe.findById(req.params.recipeId);
 
     if (!recipe)
-        throw new Error(`Recipe with ID: ${req.params.recipeId} not found`);
+        res.status(404).send(`Recipe with ID: ${req.params.recipeId} not found`);
     
     const recipeMealType = await RecipeMealType({
         recipeID: req.params.recipeId,
@@ -161,9 +165,13 @@ router.post('/addToCategory/:categoryId/:recipeId', tokenAuth, asyncMiddleware(a
  * Delete a user saved recipe.
  */
 router.delete('/removeSavedRecipe/:recipeId', tokenAuth, asyncMiddleware(async (req, res) => {
+    const recipeSaved = await UserSavedRecipe.find({
+        userID: req.user._id,
+        recipeID: req.params.recipeId
+    });
+
     const result = await UserSavedRecipe.deleteOne({
-         userID: req.user._id,
-         recipeID: req.params.recipeId
+         _id: recipeSaved[0]._id
     });
 
     res.send(result);
